@@ -1,4 +1,6 @@
 dynaconf
 fastapi
 pydantic
+python-multipart
+slowapi
 uvicorn
