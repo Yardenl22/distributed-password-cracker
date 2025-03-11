@@ -3,10 +3,16 @@ import os
 from typing import Any
 
 
+class ComponentFormatter(logging.Formatter):
+    def __init__(self, component: str):
+        super().__init__(fmt="%(asctime)s - " + component + " - %(name)s - %(levelname)s - %(message)s")
+
+
 class CustomLogger(logging.Logger):
-    def __init__(self, name: str = "logger", level: int = logging.INFO, log_file: str = "logs/app.log"):
+    def __init__(self, component: str, name: str = "logger", level: int = logging.INFO, log_file: str = "logs/password_cracker.log"):
         super().__init__(name, level)
 
+        log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", log_file))
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
         console_handler = logging.StreamHandler()
@@ -15,32 +21,26 @@ class CustomLogger(logging.Logger):
         file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
         file_handler.setLevel(level)
 
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        formatter = ComponentFormatter(component)
         console_handler.setFormatter(formatter)
         file_handler.setFormatter(formatter)
 
         self.addHandler(console_handler)
         self.addHandler(file_handler)
 
-    def info(self, message: str, **metadata: Any):
+    def log_with_metadata(self, level: int, message: str, **metadata: Any):
         if metadata:
             message += f" | Metadata: {metadata}"
-        super().info(message)
+        self.log(level, message)
+
+    def info(self, message: str, **metadata: Any):
+        self.log_with_metadata(logging.INFO, message, **metadata)
 
     def error(self, message: str, **metadata: Any):
-        if metadata:
-            message += f" | Metadata: {metadata}"
-        super().error(message)
+        self.log_with_metadata(logging.ERROR, message, **metadata)
 
     def warning(self, message: str, **metadata: Any):
-        if metadata:
-            message += f" | Metadata: {metadata}"
-        super().warning(message)
+        self.log_with_metadata(logging.WARNING, message, **metadata)
 
-    def debug(self, msg: str, **metadata: Any):
-        if metadata:
-            msg += f" | Metadata: {metadata}"
-        super().debug(msg)
-
-
-logger = CustomLogger()
+    def debug(self, message: str, **metadata: Any):
+        self.log_with_metadata(logging.DEBUG, message, **metadata)

@@ -4,8 +4,7 @@ __pycache__/
 .idea/
 
 *.so
-Distributed_Hash_Cracker.drawio
-
+src/logs
 .Python
 build/
 develop-eggs/
