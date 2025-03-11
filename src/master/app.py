@@ -3,10 +3,15 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+from src.api import router
+from src.common import CustomLogger
+
 app = FastAPI()
+app.include_router(router)
+logger = CustomLogger(component="MASTER")
 
 
-@app.get("/")
+@app.get("/health_check")
 def health_check():
     return {'status': 'alive'}
 
@@ -17,4 +22,5 @@ def root_redirect():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8080)
+    logger.info("Starting Master API...")
+    uvicorn.run(app, host='0.0.0.0', port=8080)
