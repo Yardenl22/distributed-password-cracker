@@ -1,1 +1,4 @@
 dynaconf
+fastapi
+pydantic
+uvicorn
