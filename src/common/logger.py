@@ -5,20 +5,20 @@ from typing import Any
 
 class ComponentFormatter(logging.Formatter):
     def __init__(self, component: str):
-        super().__init__(fmt="%(asctime)s - " + component + " - %(name)s - %(levelname)s - %(message)s")
+        super().__init__(fmt='%(asctime)s - ' + component + ' - %(name)s - %(levelname)s - %(message)s')
 
 
 class CustomLogger(logging.Logger):
-    def __init__(self, component: str, name: str = "logger", level: int = logging.INFO, log_file: str = "logs/password_cracker.log"):
+    def __init__(self, component: str, name: str = 'logger', level: int = logging.INFO, log_file: str = 'logs/password_cracker.log'):
         super().__init__(name, level)
 
-        log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", log_file))
+        log_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', log_file))
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
 
-        file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
+        file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
         file_handler.setLevel(level)
 
         formatter = ComponentFormatter(component)
@@ -30,7 +30,7 @@ class CustomLogger(logging.Logger):
 
     def log_with_metadata(self, level: int, message: str, **metadata: Any):
         if metadata:
-            message += f" | Metadata: {metadata}"
+            message += f' | Metadata: {metadata}'
         self.log(level, message)
 
     def info(self, message: str, **metadata: Any):

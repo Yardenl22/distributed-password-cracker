@@ -1,6 +1,8 @@
+aio_pika
 dynaconf
 fastapi
 pydantic
 python-multipart
+redis
 slowapi
 uvicorn
