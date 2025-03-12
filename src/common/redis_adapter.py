@@ -2,12 +2,15 @@ import redis.asyncio as redis
 import json
 from src.common import CustomLogger
 
+
 logger = CustomLogger(component='REDIS')
+
 
 class RedisAdapter:
     def __init__(self, redis_url: str = 'redis://localhost:6379'):
         self.redis_url = redis_url
         self.redis = None
+
 
     async def connect(self):
         try:
@@ -16,6 +19,7 @@ class RedisAdapter:
         except Exception as e:
             logger.error(f'Redis connection failed: {str(e)}')
 
+
     async def close(self):
         try:
             if self.redis:
@@ -23,6 +27,7 @@ class RedisAdapter:
                 logger.info('Redis connection closed')
         except Exception as e:
             logger.error(f'Redis close failed: {str(e)}')
+
 
     async def set_task(self, task_id: str, status: str, hashes: list[str]):
         try:
@@ -33,9 +38,10 @@ class RedisAdapter:
         except Exception as e:
             logger.error(f"Redis set_task failed: {str(e)}")
 
+
     async def get_task(self, task_id: str):
         try:
-            task_json = await self.redis.get(f"task:{task_id}")
+            task_json = await self.redis.get(f'task:{task_id}')
             if task_json:
                 return json.loads(task_json)
             return None
@@ -44,21 +50,10 @@ class RedisAdapter:
             logger.error(f"Redis get_task failed: {str(e)}")
             return None
 
-    async def get_keys(self, pattern: str):
-        try:
-            return await self.redis.keys(pattern)
-        except Exception as e:
-            logger.error(f"Redis get_keys failed: {str(e)}")
-            return []
 
-    async def update_task_status(self, task_id: str, status: str, result: str = ""):
+    async def delete_task(self, task_id: str):
         try:
-            task = await self.get_task(task_id)
-
-            if task:
-                task["status"] = status
-                task["result"] = result
-                await self.redis.set(f"task:{task_id}", json.dumps(task))
-                logger.info(f"Task {task_id} updated to status: {status}")
+            await self.redis.delete(f"task:{task_id}")
+            logger.info(f"Task {task_id} deleted from Redis")
         except Exception as e:
-            logger.error(f"Redis update_task_status failed: {str(e)}")
+            logger.error(f"Failed to delete task {task_id} from Redis: {str(e)}")

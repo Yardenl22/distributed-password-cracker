@@ -11,6 +11,7 @@ class RabbitMQAdapter:
         self.rabbit_connection = None
         self.rabbit_channel = None
 
+
     async def connect(self):
         try:
             self.rabbit_connection = await aio_pika.connect_robust(self.rabbit_url)
@@ -19,6 +20,7 @@ class RabbitMQAdapter:
         except Exception as e:
             logger.error(f'RabbitMQ connection failed: {str(e)}')
 
+
     async def close(self):
         try:
             if self.rabbit_connection:
@@ -26,6 +28,7 @@ class RabbitMQAdapter:
                 logger.info('RabbitMQ connection closed')
         except Exception as e:
             logger.error(f'RabbitMQ close failed: {str(e)}')
+
 
     async def send_task(self, queue_name: str, task_data: dict):
         try:

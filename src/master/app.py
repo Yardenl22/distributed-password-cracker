@@ -27,14 +27,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title='Distributed Password Cracker',
     description='An API for distributing password hash cracking tasks across multiple workers. '
-                'Supports direct hash submission and file uploads (.json, .txt).',
+            'Supports direct hash submission and file uploads (.json, .txt).',
     version='1.0.0',
     lifespan=lifespan
 )
 
 app.include_router(external_router)
 app.include_router(internal_router)
-
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
