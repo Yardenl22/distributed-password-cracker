@@ -9,8 +9,6 @@ from src.storage.storage_factory import storage
 
 logger = CustomLogger(component='RESULT_LISTENER')
 
-a = storage
-b = 5
 
 async def _process_results(message: aio_pika.IncomingMessage):
     async with message.process():
@@ -67,6 +65,7 @@ def run_result_processor():
         logger.error(f'Result processor encountered an error: {str(e)}', exc_info=True)
     finally:
         loop.close()
+
 
 if __name__ == '__main__':
     run_result_processor()

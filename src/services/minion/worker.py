@@ -1,39 +1,12 @@
 import aio_pika
 import asyncio
-import hashlib
 import json
 
-from src.common.config import config
 from src.common.logger import CustomLogger
 from src.common.connection_manager import connection_manager
-
-
-PREFIXES: list[str] = config.WORKER.PREFIXES
+from src.services.minion import hash_cracker
 
 logger = CustomLogger(component='WORKER')
-
-
-async def _generate_hashes(prefixes: list[str], hashes: list[str]) -> dict[str, str]:
-    found_results = {h: '' for h in hashes}
-
-    for prefix in prefixes:
-        for i in range(0, 10000000):
-            password = f'{prefix}-{i:07d}'
-            md5_hash = hashlib.md5(password.encode()).hexdigest()
-
-            if md5_hash in hashes:
-                found_results[md5_hash] = password
-
-            if sum(1 for v in found_results.values() if v) >= 5:
-                return found_results
-
-
-    return found_results
-
-
-async def _crack_hash(hashes: list[str]) -> dict[str, str] :
-    results = await _generate_hashes(PREFIXES, hashes)
-    return results
 
 
 async def _process_task(message: aio_pika.IncomingMessage):
@@ -43,7 +16,8 @@ async def _process_task(message: aio_pika.IncomingMessage):
             task_id = task['id']
             hashes = task['hashes']
             logger.info(f'Processing task {task_id}')
-            cracked_results = await _crack_hash(hashes)
+
+            cracked_results = await hash_cracker.crack_hashes(hashes)
 
             channel = connection_manager.rabbitmq_adapter.channel
             result_queue = await channel.declare_queue('results_queue', durable=True)
