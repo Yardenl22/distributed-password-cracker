@@ -64,8 +64,10 @@ async def upload_file(
     try:
         if file.content_type == 'application/json':
             hashes = await _process_json_file(file)
+
         elif file.content_type == 'text/plain':
             hashes = await _process_txt_file(file)
+
         else:
             raise HTTPException(status_code=400, detail='Only .json or .txt files are allowed')
 

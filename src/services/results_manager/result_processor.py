@@ -1,6 +1,7 @@
 import aio_pika
 import asyncio
 import json
+import redis
 
 from src.common.logger import CustomLogger
 from src.common.connection_manager import connection_manager
@@ -24,8 +25,16 @@ async def _process_results(message: aio_pika.IncomingMessage):
             await connection_manager.redis_adapter.delete_task(task_id)
             logger.info(f'Task {task_id} deleted from Redis after processing')
 
+        except json.JSONDecodeError as e:
+            logger.error(f'Invalid JSON format in result message: {str(e)}', exc_info=True)
+            await message.nack(requeue=False)
+
+        except redis.exceptions.RedisError as e:
+            logger.error(f'Redis error while processing task {task_id}: {str(e)}', exc_info=True)
+            await message.nack(requeue=True)
+
         except Exception as e:
-            logger.error(f'Failed to process result message: {str(e)}')
+            logger.error(f'Unexpected error while processing result message: {str(e)}', exc_info=True)
             await message.nack(requeue=True)
 
 
