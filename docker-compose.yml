@@ -2,89 +2,91 @@ version: '3.8'
 
 services:
   master:
-    build: .
-    container_name: master_api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.master
+    container_name: master-api
     ports:
-      - "8080:8080"
-    depends_on:
-      - redis
-      - rabbitmq
+      - "8000:8000"
     environment:
-      REDIS_CONNECTION_STRING: "redis://redis:6379"
-      RABBITMQ_CONNECTION_STRING: "amqp://guest:guest@rabbitmq:5672/"
-      RESULTS_DIR: "results"
-      RESULTS_FILE_NAME: "cracked_passwords.json"
-    volumes:
-      - ./results:/app/results
+      - REDIS_CONNECTION_STRING=redis://redis:6379
+      - RABBITMQ_CONNECTION_STRING=amqp://guest:guest@rabbitmq:5672/
+      - PYTHONPATH=/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app_network
+    volumes:
+      - .:/app
 
-  minion:
-    build: .
-    depends_on:
-      - redis
-      - rabbitmq
-    environment:
-      REDIS_CONNECTION_STRING: "redis://redis:6379"
-      RABBITMQ_CONNECTION_STRING: "amqp://guest:guest@rabbitmq:5672/"
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
     deploy:
       replicas: 5
+    environment:
+      - PYTHONPATH=/app/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app_network
+    volumes:
+      - .:/app
 
   result_processor:
-    build: .
-    depends_on:
-      - redis
-      - rabbitmq
-    environment:
-      REDIS_CONNECTION_STRING: "redis://redis:6379"
-      RABBITMQ_CONNECTION_STRING: "amqp://guest:guest@rabbitmq:5672/"
-      RESULTS_DIR: "results"
-      RESULTS_FILE_NAME: "cracked_passwords.json"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.result_processor
     deploy:
       replicas: 2
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app_network
+    volumes:
+      - .:/app
 
   redis:
     image: redis:latest
-    container_name: redis_db
+    container_name: redis
+    restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
     networks:
       - app_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq_broker
+    container_name: rabbitmq
+    restart: always
     ports:
       - "5672:5672"
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - app_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   app_network:
     driver: bridge
-
-volumes:
-  redis_data:
-    driver: local
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: "size=500m"
-  rabbitmq_data:
-    driver: local
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: "size=500m"

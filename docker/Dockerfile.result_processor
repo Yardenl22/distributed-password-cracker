@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY . /app
+
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+ENV PYTHONPATH=/app/src
+
+CMD ["python", "-m","src.services.results_manager.result_processor"]
