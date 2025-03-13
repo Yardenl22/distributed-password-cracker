@@ -13,13 +13,13 @@ class JSONStorage(BaseStorage):
 
 
     def _ensure_storage_exists(self):
-        if not self.storage_path.exists() or not self.storage_path.read_text(encoding="utf-8").strip():
-            with self.storage_path.open("w", encoding="utf-8") as f:
+        if not self.storage_path.exists() or not self.storage_path.read_text(encoding='utf-8').strip():
+            with self.storage_path.open('w', encoding='utf-8') as f:
                 json.dump([], f, indent=4)
 
 
     async def _load_existing_data(self) -> list[CrackedPassword]:
-        async with aiofiles.open(self.storage_path, "r", encoding="utf-8") as f:
+        async with aiofiles.open(self.storage_path, 'r', encoding='utf-8') as f:
             content = await f.read()
             data = json.loads(content) if content else []
             return [CrackedPassword(**item) for item in data]
@@ -36,7 +36,7 @@ class JSONStorage(BaseStorage):
 
         serialized_data = [item.model_dump() for item in all_results]
 
-        async with aiofiles.open(self.storage_path, "w", encoding="utf-8") as f:
+        async with aiofiles.open(self.storage_path, 'w', encoding='utf-8') as f:
             await f.write(json.dumps(serialized_data, indent=4))
 
 

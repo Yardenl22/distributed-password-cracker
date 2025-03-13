@@ -6,9 +6,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from src.common.logger import CustomLogger
 from src.common.config import config
 from src.common.connection_manager import connection_manager
+from src.common.logger import CustomLogger
 from src.services.master.api import external_router, internal_router
 
 
@@ -25,10 +25,10 @@ async def lifespan(app: FastAPI):
     logger.info('Initializing Redis & RabbitMQ connections...')
     await connection_manager.connect_redis()
     await connection_manager.connect_rabbitmq()
+    app.state.limiter = limiter
     yield
     logger.info('Closing Redis & RabbitMQ connections...')
-    await connection_manager.close_redis()
-    await connection_manager.close_rabbitmq()
+    await connection_manager.close_connections()
 
 
 app = FastAPI(

@@ -3,9 +3,10 @@ import hashlib
 from src.common.config import config
 from src.common.logger import CustomLogger
 
+
 PREFIXES: list[str] = config.WORKER.PREFIXES
 
-logger = CustomLogger(component="HASH_CRACKER")
+logger = CustomLogger(component='HASH_CRACKER')
 
 async def _generate_hashes(prefixes: list[str], hashes: list[str]) -> dict[str, str]:
     found_results = {h: '' for h in hashes}

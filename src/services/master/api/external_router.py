@@ -6,7 +6,7 @@ from slowapi.util import get_remote_address
 
 from src.common.logger import CustomLogger
 from src.common.connection_manager import connection_manager
-from src.common.models import TaskStatusResponse, TaskRequest
+from src.common.models import TaskStatusResponse, TaskRequest, Task
 
 from .internal_router import submit_task
 
@@ -41,11 +41,17 @@ async def _process_txt_file(file: UploadFile) -> list[str]:
 @limiter.limit('10/minute')
 async def upload_hashes(request: Request, task_request: TaskRequest):
     try:
-        await submit_task(task_request.hashes)
-        response = {
-            'message': 'Cracking has started',
-            'hashes': task_request.hashes
-        }
+        tasks: list[Task] = await submit_task(task_request.hashes)
+        response = [
+            {
+                'message': 'Hashes sent to decryption',
+                'Tasks': {
+                    "id": task.id,
+                    'Hashes': task.hashes
+                }
+            }
+            for task in tasks
+        ]
         return response
 
     except Exception as e:
@@ -56,25 +62,32 @@ async def upload_hashes(request: Request, task_request: TaskRequest):
 @external_router.post('/upload_file')
 @limiter.limit('5/minute')
 async def upload_file(
-    request: Request,
-    file: UploadFile = File(
-        ...,
-        description='Supported file types: .json (hashes: list of hashes) or .txt (one hash per line)')
+        request: Request,
+        file: UploadFile = File(
+            ...,
+            description='Supported file types: .json (hashes: list of hashes) or .txt (one hash per line)')
 ):
     try:
         if file.content_type == 'application/json':
             hashes = await _process_json_file(file)
+
         elif file.content_type == 'text/plain':
             hashes = await _process_txt_file(file)
+
         else:
             raise HTTPException(status_code=400, detail='Only .json or .txt files are allowed')
 
-        await submit_task(hashes)
-
-        response = {
-            'message': 'Calculation has started',
-            'hashes': hashes
-        }
+        tasks: list[Task] = await submit_task(hashes)
+        response = [
+            {
+                'message': 'Hashes sent to decryption',
+                'Tasks': {
+                    "id": task.id,
+                    'Hashes': task.hashes
+                }
+            }
+            for task in tasks
+        ]
         return response
 
     except Exception as e:

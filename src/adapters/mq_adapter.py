@@ -3,6 +3,7 @@ import aio_pika
 
 from src.common.logger import CustomLogger
 
+
 logger = CustomLogger(component='RABBITMQ')
 
 
