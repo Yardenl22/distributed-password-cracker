@@ -36,7 +36,7 @@ async def _crack_hash(hashes: list[str]) -> dict[str, str] :
     return results
 
 
-async def process_task(message: aio_pika.IncomingMessage):
+async def _process_task(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
             task = json.loads(message.body.decode())
@@ -68,7 +68,7 @@ async def worker_loop():
 
         logger.info('Worker started, waiting for tasks...')
 
-        await queue.consume(process_task)
+        await queue.consume(_process_task)
         await asyncio.Future()
 
     except Exception as e:

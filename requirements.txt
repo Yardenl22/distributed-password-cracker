@@ -1,4 +1,5 @@
 aio_pika
+aiofiles
 dynaconf
 fastapi
 pydantic
