@@ -25,7 +25,7 @@ cd distributed-password-cracker
 
 ### **2️⃣ Build & Start the System**
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 This will:
 - Start **FastAPI** on `http://localhost:8080`
