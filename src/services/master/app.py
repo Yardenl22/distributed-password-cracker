@@ -1,12 +1,19 @@
 import uvicorn
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from src.api import external_router, internal_router
-from src.common import CustomLogger, connection_manager
+from slowapi.util import get_remote_address
+
+from src.common.logger import CustomLogger
+from src.common.config import config
+from src.common.connection_manager import connection_manager
+from src.services.master.api import external_router, internal_router
+
+
+HOST: str = config.SERVICE.HOST
+PORT: int = config.SERVICE.PORT
 
 
 logger = CustomLogger(component='MASTER')
@@ -27,7 +34,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title='Distributed Password Cracker',
     description='An API for distributing password hash cracking tasks across multiple workers. '
-            'Supports direct hash submission and file uploads (.json, .txt).',
+                'Supports direct hash submission and file uploads (.json, .txt).',
     version='1.0.0',
     lifespan=lifespan
 )
@@ -44,4 +51,4 @@ def root_redirect():
 
 if __name__ == '__main__':
     logger.info('Starting Master API...')
-    uvicorn.run(app, host='0.0.0.0', port=8080)
+    uvicorn.run(app, host=HOST, port=PORT)

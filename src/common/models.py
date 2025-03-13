@@ -1,6 +1,6 @@
 import hashlib
-from pydantic import BaseModel, PlainValidator, computed_field
 from enum import Enum
+from pydantic import BaseModel, PlainValidator, computed_field
 from typing import Annotated
 
 
@@ -11,6 +11,7 @@ def _validate_md5(value: str) -> str:
 
 
 MD5Hash = Annotated[str, PlainValidator(_validate_md5)]
+
 
 class TaskRequest(BaseModel):
     hashes: list[MD5Hash]
@@ -32,7 +33,11 @@ class TaskStatusResponse(BaseModel):
 
 
 class TaskStatusEnum(str, Enum):
-    QUEUED = "queued"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    NOT_FOUND = "not_found"
+    QUEUED = 'queued'
+    PROCESSING = 'processing'
+    COMPLETED = 'completed'
+    NOT_FOUND = 'not_found'
+
+class CrackedPassword(BaseModel):
+    hash: str
+    password: str

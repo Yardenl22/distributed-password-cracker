@@ -2,6 +2,7 @@ aio_pika
 dynaconf
 fastapi
 pydantic
+python-dotenv
 python-multipart
 redis
 slowapi

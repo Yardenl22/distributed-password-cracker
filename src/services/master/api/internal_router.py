@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException
-from src.common import CustomLogger, connection_manager
+
+from src.common.logger import CustomLogger
+from src.common.connection_manager import connection_manager
 from src.common.models import Task, TaskStatusEnum
+
+
+CHUNK_SIZE = 5
 
 internal_router = APIRouter()
 logger = CustomLogger(component='INTERNAL_API')
 
-CHUNK_SIZE = 5
 
 @internal_router.post('/submit_task', include_in_schema=False)
 async def submit_task(hashes: list[str]):
@@ -19,5 +23,5 @@ async def submit_task(hashes: list[str]):
             logger.info(f'Task {task.id} send successfully to tasks_queue')
 
     except Exception as e:
-        logger.error(f"Failed to submit task: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(f'Failed to submit task: {str(e)}')
+        raise HTTPException(status_code=500, detail='Internal server error')

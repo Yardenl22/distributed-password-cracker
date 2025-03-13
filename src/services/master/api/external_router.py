@@ -4,9 +4,11 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from src.api.internal_router import submit_task
-from src.common import CustomLogger, connection_manager
+from src.common.logger import CustomLogger
+from src.common.connection_manager import connection_manager
 from src.common.models import TaskStatusResponse, TaskRequest
+
+from .internal_router import submit_task
 
 external_router = APIRouter()
 logger = CustomLogger(component='EXTERNAL_API')
@@ -85,6 +87,7 @@ async def upload_file(
 async def task_status(request: Request, task_id: str):
     try:
         task: dict = await connection_manager.redis_adapter.get_task(task_id)
+
         if not task:
             raise HTTPException(status_code=404, detail='Task not found')
 
@@ -92,5 +95,6 @@ async def task_status(request: Request, task_id: str):
         return task_response
 
     except Exception as e:
-        logger.error(f'Failed to get task status: {str(e)}')
-        raise HTTPException(status_code=500, detail='Internal server error')
+        error = str(e)
+        logger.error(f'Failed to get task status: {error}')
+        raise HTTPException(status_code=404, detail=error)

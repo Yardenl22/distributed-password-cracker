@@ -1,14 +1,21 @@
-from src.common import CustomLogger
-from src.common.mq_adapter import RabbitMQAdapter
-from src.common.redis_adapter import RedisAdapter
+from src.adapters import RabbitMQAdapter, RedisAdapter
+
+from . import utils
+from .logger import CustomLogger
+
+
+REDIS_CONNECTION_STRING: str = utils.get_env_variable('REDIS_CONNECTION_STRING')
+RABBITMQ_CONNECTION_STRING: str = utils.get_env_variable('RABBITMQ_CONNECTION_STRING')
 
 
 logger = CustomLogger(component='CONNECTION_MANAGER')
 
+
 class ConnectionManager:
-    def __init__(self, redis_url: str = 'redis://localhost:6379', rabbit_url: str = 'amqp://guest:guest@localhost:5672/'):
+    def __init__(self, redis_url: str = REDIS_CONNECTION_STRING, rabbit_url: str = RABBITMQ_CONNECTION_STRING):
         self.redis_adapter = RedisAdapter(redis_url)
         self.rabbitmq_adapter = RabbitMQAdapter(rabbit_url)
+
 
     async def connect_redis(self):
         try:
@@ -17,12 +24,14 @@ class ConnectionManager:
         except Exception as e:
             logger.error(f'Redis connection failed: {str(e)}')
 
+
     async def connect_rabbitmq(self):
         try:
             await self.rabbitmq_adapter.connect()
             logger.info('Connected to RabbitMQ')
         except Exception as e:
             logger.error(f'RabbitMQ connection failed: {str(e)}')
+
 
     async def close_connections(self):
         try:
