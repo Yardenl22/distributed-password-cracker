@@ -28,7 +28,7 @@ cd distributed-password-cracker
 docker-compose up --build -d
 ```
 This will:
-- Start **FastAPI** on `http://localhost:8080`
+- Start **FastAPI** on `http://localhost:8000`
 - Initialize **RabbitMQ** and **Redis**
 - Run **5 minion workers** and **2 result processors**
 
@@ -38,11 +38,11 @@ docker ps
 ```
 
 ### **4️⃣ Access the API**
-- Open **`http://localhost:8080/docs`** in your browser.
+- Open **`http://localhost:8000/docs`** in your browser.
 
 ### **5️⃣ Submit a Hash for Cracking**
 ```bash
-curl -X POST "http://localhost:8080/upload_hashes" \
+curl -X POST "http://localhost:8000/upload_hashes" \
      -H "Content-Type: application/json" \
      -d '{"hashes": [
             "1d0b28c7e3ef0ba9d3c04a4183b576ac",
@@ -56,7 +56,7 @@ curl -X POST "http://localhost:8080/upload_hashes" \
 
 ### **6️⃣ Check Task Status**
 ```bash
-curl -X GET "http://localhost:8080/task_status/your_task_id"
+curl -X GET "http://localhost:8000/task_status/your_task_id"
 ```
 
 ### **7️⃣ Access RabbitMQ UI**
