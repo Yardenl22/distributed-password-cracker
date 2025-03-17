@@ -10,7 +10,6 @@ The project utilizes **FastAPI**, **RabbitMQ**, **Redis**, and a set of **asynch
 - Scalable Architecture – Can dynamically scale minion workers and result processors.
 - Task Queueing with RabbitMQ – Ensures efficient task distribution and load balancing.
 - Redis-based Status Storage – Enables fast retrieval of task statuses.
-- Persistent Storage – Redis and RabbitMQ use **PVC (Persistent Volumes)** to prevent data loss.
 - Fault-Tolerant System – Implements retry mechanisms and exception handling for stability.
 - Fully Containerized with Docker – Just **pull, run, and deploy** with `docker-compose`.
 
@@ -61,7 +60,7 @@ curl -X GET "http://localhost:8000/task_status/your_task_id"
 
 ### **7️⃣ Access RabbitMQ UI**
 - Open **`http://localhost:15672`**
-- Username: `user`, Password: `password`
+- Username: `guest`, Password: `guest`
 
 ### **8️⃣ Scaling Workers**
 Need more power? Scale workers dynamically:
@@ -113,4 +112,4 @@ The system is designed to run as a **distributed microservices architecture**:
 
 ---
 
-🚀 **This system is ready for deployment and can easily scale with additional minion workers!**
+**This system is ready for deployment and can easily scale with additional minion workers**
