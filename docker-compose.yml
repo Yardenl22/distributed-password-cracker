@@ -9,6 +9,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - TZ=Asia/Jerusalem
       - REDIS_CONNECTION_STRING=redis://redis:6379
       - RABBITMQ_CONNECTION_STRING=amqp://guest:guest@rabbitmq:5672/
       - PYTHONPATH=/app
@@ -29,6 +30,7 @@ services:
     deploy:
       replicas: 5
     environment:
+      - TZ=Asia/Jerusalem
       - PYTHONPATH=/app/src
     depends_on:
       rabbitmq:
@@ -45,8 +47,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.result_processor
     deploy:
-      replicas: 2
+      replicas: 1
     environment:
+      - TZ=Asia/Jerusalem
       - PYTHONPATH=/app
     depends_on:
       rabbitmq:
@@ -62,6 +65,8 @@ services:
     image: redis:latest
     container_name: redis
     restart: always
+    environment:
+      - TZ=Asia/Jerusalem
     ports:
       - "6379:6379"
     networks:
@@ -76,6 +81,8 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: always
+    environment:
+      - TZ=Asia/Jerusalem
     ports:
       - "5672:5672"
       - "15672:15672"

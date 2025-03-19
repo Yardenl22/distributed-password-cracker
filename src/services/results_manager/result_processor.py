@@ -27,15 +27,12 @@ async def _process_results(message: aio_pika.IncomingMessage):
 
         except json.JSONDecodeError as e:
             logger.error(f'Invalid JSON format in result message: {str(e)}', exc_info=True)
-            await message.nack(requeue=False)
 
         except redis.exceptions.RedisError as e:
             logger.error(f'Redis error while processing task {task_id}: {str(e)}', exc_info=True)
-            await message.nack(requeue=True)
 
         except Exception as e:
             logger.error(f'Unexpected error while processing result message: {str(e)}', exc_info=True)
-            await message.nack(requeue=True)
 
 
 

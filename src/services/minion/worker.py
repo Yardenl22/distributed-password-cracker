@@ -28,15 +28,12 @@ async def _process_task(message: aio_pika.IncomingMessage):
 
         except aio_pika.exceptions.AMQPError as e:
             logger.error(f'RabbitMQ error while processing task: {str(e)}', exc_info=True)
-            await message.nack(requeue=True)
 
         except asyncio.TimeoutError as e:
             logger.error(f'Timeout error during task processing: {str(e)}', exc_info=True)
-            await message.nack(requeue=True)
 
         except Exception as e:
             logger.error(f'Worker processing failed: {str(e)}', exc_info=True)
-            await message.nack(requeue=True)
 
 
 async def worker_loop():
