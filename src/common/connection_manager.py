@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 from src.adapters import RabbitMQAdapter, RedisAdapter
 
 from . import utils
@@ -23,6 +25,7 @@ class ConnectionManager:
             logger.info('Connected to Redis')
         except Exception as e:
             logger.error(f'Redis connection failed: {str(e)}')
+            raise HTTPException(status_code=503, detail="Failed to connect to Redis")
 
 
     async def connect_rabbitmq(self):
@@ -31,6 +34,7 @@ class ConnectionManager:
             logger.info('Connected to RabbitMQ')
         except Exception as e:
             logger.error(f'RabbitMQ connection failed: {str(e)}')
+            raise HTTPException(status_code=503, detail="Failed to connect to RabbitMQ")
 
 
     async def close_connections(self):

@@ -1,4 +1,5 @@
 import json
+from http.client import responses
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 from slowapi import Limiter
@@ -7,11 +8,11 @@ from slowapi.util import get_remote_address
 from src.common.logger import CustomLogger
 from src.common.connection_manager import connection_manager
 from src.common.models import TaskStatusResponse, TaskRequest, Task
+from src.services import task_service
 
-from .internal_router import submit_task
 
-external_router = APIRouter()
-logger = CustomLogger(component='EXTERNAL_API')
+router = APIRouter()
+logger = CustomLogger(component='ROUTER')
 limiter = Limiter(key_func=get_remote_address)
 
 
@@ -37,11 +38,15 @@ async def _process_txt_file(file: UploadFile) -> list[str]:
         raise HTTPException(status_code=400, detail=f'Invalid text file: {str(e)}')
 
 
-@external_router.post('/upload_hashes')
+@router.post('/upload_hashes')
 @limiter.limit('10/minute')
 async def upload_hashes(request: Request, task_request: TaskRequest):
     try:
-        tasks: list[Task] = await submit_task(task_request.hashes)
+        tasks: list[Task] = await task_service.submit_task(task_request.hashes)
+
+        if not tasks:
+            return {'Message': 'Sent hashes already calculated'}
+
         response = [
             {
                 'message': 'Hashes sent to decryption',
@@ -59,7 +64,7 @@ async def upload_hashes(request: Request, task_request: TaskRequest):
         raise HTTPException(status_code=500, detail='Internal server error')
 
 
-@external_router.post('/upload_file')
+@router.post('/upload_file')
 @limiter.limit('5/minute')
 async def upload_file(
         request: Request,
@@ -77,7 +82,7 @@ async def upload_file(
         else:
             raise HTTPException(status_code=400, detail='Only .json or .txt files are allowed')
 
-        tasks: list[Task] = await submit_task(hashes)
+        tasks: list[Task] = await task_service.submit_task(hashes)
         response = [
             {
                 'message': 'Hashes sent to decryption',
@@ -95,7 +100,7 @@ async def upload_file(
         raise HTTPException(status_code=500, detail='Internal server error')
 
 
-@external_router.get('/task_status/{task_id}', response_model=TaskStatusResponse)
+@router.get('/task_status/{task_id}', response_model=TaskStatusResponse)
 @limiter.limit('20/minute')
 async def task_status(request: Request, task_id: str):
     try:

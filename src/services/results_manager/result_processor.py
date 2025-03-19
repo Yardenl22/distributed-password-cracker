@@ -20,7 +20,7 @@ async def _process_results(message: aio_pika.IncomingMessage):
 
             await storage.save_results(results)
 
-            logger.info(f'Received result for task {task_id}: {results.items()}')
+            logger.info(f'Received result for task {task_id}: {results}')
 
             await connection_manager.redis_adapter.delete_task(task_id)
             logger.info(f'Task {task_id} deleted from Redis after processing')

@@ -9,7 +9,7 @@ from slowapi.util import get_remote_address
 from src.common.config import config
 from src.common.connection_manager import connection_manager
 from src.common.logger import CustomLogger
-from src.services.master.api import external_router, internal_router
+from src.services.master.router import router
 
 
 HOST: str = config.SERVICE.HOST
@@ -39,8 +39,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(external_router)
-app.include_router(internal_router)
+app.include_router(router)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
